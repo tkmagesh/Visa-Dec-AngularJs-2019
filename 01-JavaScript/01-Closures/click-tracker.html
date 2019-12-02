@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Click Tracker</title>
+    <script>
+        (function myApp(){
+            var counter = 0;
+
+            function onBtnClick(){
+                ++counter;
+                document.getElementById('divResult').innerHTML = counter;
+            }
+
+            function init(){
+                var btnClick = document.getElementById('btnClick');
+                btnClick.addEventListener('click', onBtnClick);
+            }
+
+            window.addEventListener('load', init);
+        })();
+        //myApp();
+    </script>
+</head>
+<body>
+    <input type="button" value="Click" id="btnClick" >
+    <div id="divResult"></div>
+</body>
+</html>
