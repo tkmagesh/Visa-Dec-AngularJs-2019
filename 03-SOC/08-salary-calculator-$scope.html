@@ -91,6 +91,21 @@
             });
 
             //Reacting to model changes
+            
+            $scope.$watch('model.basic', function (newValue, oldValue) {
+                $('#txtBasic').val(newValue);
+            });
+            $scope.$watch('model.hra', function (newValue, oldValue) {
+                $('#txtHra').val(newValue);
+            });
+            $scope.$watch('model.da', function (newValue, oldValue) {
+                $('#txtDa').val(newValue);
+            });
+            $scope.$watch('model.tax', function (newValue, oldValue) {
+                $('#rangeTax').val(newValue);
+            });
+
+            
             $scope.$watch('model.salary', function(newValue, oldValue){
                 $('#tdSalary').html(newValue);
             });
