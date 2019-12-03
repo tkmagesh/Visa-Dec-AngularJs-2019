@@ -5,6 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Calculator</title>
+    <script src="jquery-3.4.1.js"></script>
+    <script>
+        $(function(){
+            function getInputs(){
+                return {
+                    n1 : parseInt($('#txtNumber1').val()),
+                    n2 : parseInt($('#txtNumber2').val())
+                };
+            }
+            $('#btnAdd').click(function(){
+                var inputs = getInputs(),
+                    result = inputs.n1 + inputs.n2;
+                $('#divResult').html(result);                
+            })
+            $('#btnSubtract').click(function () {
+                var inputs = getInputs(),
+                    result = inputs.n1 - inputs.n2;
+                $('#divResult').html(result);
+            })
+            $('#btnMultiply').click(function () {
+                var inputs = getInputs(),
+                    result = inputs.n1 * inputs.n2;
+                $('#divResult').html(result);
+            })
+            $('#btnDivide').click(function () {
+                var inputs = getInputs(),
+                    result = inputs.n1 / inputs.n2;
+                $('#divResult').html(result);
+            })
+        })
+    </script>
 </head>
 <body>
     <h1>Calculator</h1>
