@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Salary Calculator</title>
+    <style>
+        body{
+            margin-left: 50px;
+        }
+        .field{
+            margin-bottom: 10px;
+        }
+        label{
+            display : block;
+        }
+        td{
+            padding-right: 10px;
+            font-size: 18pt;
+        }
+    </style>
+    <script src="jquery-3.4.1.js"></script>
+    <script src="angular.js"></script>
+    <script>
+        String.prototype.toInt = function(){
+            return parseInt(this, 10);
+        };
+
+        //state & behavior 
+       function SalaryCalculatorModel() {
+            //state
+            this.basic = 0;
+            this.hra = 0;
+            this.da = 0;
+            this.tax = 0;
+            this.salary = 0;
+        }
+
+        SalaryCalculatorModel.prototype.calculate = function () {
+            var gross = this.basic + this.hra + this.da,
+                net = gross * ((100 - this.tax) / 100);
+            this.salary = net;
+        }
+
+        function bindTwoWay($element, attrName){
+            $element.change(function () {
+                var $self = $(this);
+                $scope.$apply(function () {
+                    var expr = attrName + ' = ' + $self.val().toInt();
+                    $scope.$eval(expr);
+                });
+            });
+            $scope.$watch(attrName, function (newValue, oldValue) {
+                $element.val(newValue);
+            });
+        }
+
+        function bindOneWay($element, attrName){
+            $scope.$watch(attrName, function (newValue, oldValue) {
+                $element.html(newValue);
+            });
+        }
+
+        function bindClick($element, expr){
+            $element.click(function () {
+                $scope.$apply(function () {
+                    $scope.$eval(expr);
+                });
+            });
+        }
+
+        //Reactive 
+        $(function(){
+             angular.injector(['ng']).invoke(function ($rootScope) {
+                window['$scope'] = $rootScope;
+                window['model'] = $scope.model = new SalaryCalculatorModel();
+            });
+            
+            $('*[app-model]').each(function(index, element){
+                var $element = $(element),
+                    attrName = $element.attr('app-model');
+                bindTwoWay($element, attrName);
+
+            })
+           
+            $('*[app-click]').each(function(index, element){
+                var $element = $(element),
+                    expr = $element.attr('app-click');
+                bindClick($element, expr);
+            })
+
+            $('*[app-bind]').each(function (index, element) {
+                var $element = $(element),
+                    attrName = $element.attr('app-bind');
+                bindOneWay($element, attrName);
+            })
+            
+        });
+    </script>
+</head>
+<body>
+    <h1>Salary Calculator</h1>
+    <hr>
+    <section>
+        <div class="field">
+            <label for="">Basic :</label>
+            <input type="number" id="txtBasic" app-model="model.basic">
+        </div>
+        <div class="field">
+            <label for="">HRA :</label>
+            <input type="number" id="txtHra" app-model="model.hra">
+        </div>
+        <div class="field">
+            <label for="">DA :</label>
+            <input type="number" id="txtDa" app-model="model.da">
+        </div>
+        <div class="field">
+            <label for="">Tax :</label>
+            <input type="range" id="rangeTax" min="0" max="30" app-model="model.tax">
+        </div>
+        <div class="field">
+            <input type="button" value="Calculate" id="btnCalculate" app-click="model.calculate()">
+        </div>
+        <div class="field">
+            <table>
+                <tbody>
+                    <tr>
+                        <td id="tdBasic" app-bind="model.basic" >[Basic]</td>
+                        <td id="tdHra" app-bind="model.hra">[HRA]</td>
+                        <td id="tdDa" app-bind="model.da">[Da]</td>
+                        <td id="tdTax" app-bind="model.tax">[Tax]</td>
+                        <td id="tdSalary" app-bind="model.salary">[Salary]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</body>
+</html>
