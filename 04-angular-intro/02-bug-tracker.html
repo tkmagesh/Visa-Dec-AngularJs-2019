@@ -49,7 +49,26 @@
         (done) 6. Filter the bugs
         (done) 7. Sort the bugs
         (done) 8. Improvise the bug Display
-        9. Persist the bugs in the localStorage
+        (done) 9. Persist the bugs in the localStorage
+                    window.localStorage
+                    ===================
+                    * key/value store
+                    * key has to be unique
+                        (introduce an 'id' attribute to the bug to have unique values (1...infinity))
+                    * key & value must be strings
+                        (use JSON.stringify & JSON.parse for serialization and deserialization)
+                    * ~ 10 MB per origin
+                    * Same Origin Policy
+                    * APIs
+                    ------
+                        - setItem(key, value)
+                        - getItem(key) => value
+                        - removeItem(key)
+                        - clear()
+                        - key(index) => key at index
+                        - length
+
+        11. Display 'createdAt' for each bug
         10. Persist the bug in the server
     </script>
     <script src="angular.js"></script>
@@ -60,8 +79,10 @@
             return function(){
                 function createNew(bugName) {
                     var newBug = {
+                        id : 0,
                         name: bugName,
-                        isClosed: false
+                        isClosed: false,
+                        createdAt : new Date()
                     };
                     return newBug;
                 }
@@ -72,30 +93,54 @@
             }
         });
 
-        bugTrackerApp.service('bugsCollection', function(bugOperations){
-            this.bugs = [];
+        bugTrackerApp.service('bugStorage', function(){
+            var storage = window.localStorage;
+            var currentBugId = 0;
+            this.getAll = function(){
+                var result = [];
+                for(var index = 0, count = storage.length; index < count; index++){
+                    var key = storage.key(index),
+                        rawData = storage.getItem(key),
+                        bug = JSON.parse(rawData);
+                    currentBugId = currentBugId > bug.id ? currentBugId : bug.id;
+                    result.push(bug);
+                }
+                return result;
+            };
+
+            this.save = function(bugData){
+                if (bugData.id === 0)
+                    bugData.id = ++currentBugId;
+                storage.setItem(bugData.id, JSON.stringify(bugData));
+                return bugData;
+            };
+            this.remove = function(bugData){
+                storage.removeItem(bugData.id)
+            };
+        });
+
+        bugTrackerApp.service('bugsCollection', function(bugOperations, bugStorage){
+            this.bugs = bugStorage.getAll();
             var bugOperationsInstance = bugOperations();
 
              this.addNew = function (newBugName) {
-                var newBug = bugOperationsInstance.createNew(newBugName);
+                var newBugData = bugOperationsInstance.createNew(newBugName);
+                var newBug = bugStorage.save(newBugData);
                 this.bugs.push(newBug);
             };
 
             this.toggle = function (bug) {
                 bugOperationsInstance.toggle(bug);
+                bugStorage.save(bug);
             };
 
             this.removeClosed = function () {
                 for (var index = this.bugs.length - 1; index >= 0; index--) {
-                    if (this.bugs[index].isClosed)
+                    if (this.bugs[index].isClosed){
+                        bugStorage.remove(this.bugs[index]);
                         this.bugs.splice(index, 1);
+                    }
                 }
-            };
-
-            this.getClosedCount = function () {
-                return this.bugs.reduce(function (result, bug) {
-                    return bug.isClosed ? ++result : result;
-                }, 0);
             };
         })
 
@@ -117,11 +162,20 @@
                 return data.length <= maxLength ? data : data.substr(0,maxLength) + '...';
             };
         });
+
+        bugTrackerApp.filter('closedCount', function(){
+            return function(bugs){
+                return bugs.reduce(function(result, bug){
+                    return bug.isClosed ? ++result : result;
+                },0)
+            };
+        });
+
     </script>
 </head>
 <body ng-app="bugTrackerApp">
     <div class="stats" ng-controller="bugStatsController">
-        <span class="closed">{{bugsCollection.getClosedCount()}}</span>
+        <span class="closed">{{bugsCollection.bugs | closedCount}}</span>
         <span> / </span>
         <span>{{bugsCollection.bugs.length}}</span>
     </div>
