@@ -48,7 +48,7 @@
         (done) 5. Display stats ( # of closed bugs / total # of bugs )
         (done) 6. Filter the bugs
         (done) 7. Sort the bugs
-        8. Improvise the bug Display
+        (done) 8. Improvise the bug Display
         9. Persist the bugs in the localStorage
         10. Persist the bug in the server
     </script>
@@ -107,7 +107,16 @@
 
         bugTrackerApp.controller('bugStatsController', function($scope, bugsCollection){
             $scope.bugsCollection = bugsCollection;
-        })
+        });
+
+        bugTrackerApp.value('defaultMaxLength', 30);
+
+        bugTrackerApp.filter('trimText', function(defaultMaxLength){
+            return function(data, maxLength){
+                maxLength = maxLength || defaultMaxLength;
+                return data.length <= maxLength ? data : data.substr(0,maxLength) + '...';
+            };
+        });
     </script>
 </head>
 <body ng-app="bugTrackerApp">
@@ -142,6 +151,7 @@
             <input type="button" value="Add New" ng-click="bugsCollection.addNew(newBugName)">
         </div>
         <div class="list">
+            <input type="range" ng-model="trimTextLength" ng-init="trimTextLength=10" min="10" max="150">
             <ol>
                 <li ng-repeat="bug in bugsCollection.bugs | filter:searchBug | orderBy:sortBugBy:sortBugDescending track by $index">
                     <span 
@@ -149,7 +159,7 @@
                         ng-click="bugsCollection.toggle(bug)"
                         ng-class="{ closed : bug.isClosed }"
                     >
-                        {{bug.name}}
+                        {{bug.name | trimText:trimTextLength}}
                     </span>
                     <div class="datetime">[Created At]</div>
                 </li>
