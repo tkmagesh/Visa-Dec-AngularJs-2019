@@ -56,46 +56,70 @@
     <script>
         var bugTrackerApp = angular.module('bugTrackerApp', []);
 
-        bugTrackerApp.controller('bugsController', function($scope){
-            $scope.newBugName = '';
-            $scope.bugs = [];
-            $scope.addNew = function(){
-                var newBug = {
-                    name : $scope.newBugName,
-                    isClosed : false
-                };
-                $scope.bugs.push(newBug);
-            };
-            $scope.toggle = function(bug){
-                bug.isClosed = !bug.isClosed;
-            };
-            $scope.removeClosed = function(){
-               /*  $scope.bugs = $scope.bugs.filter(function(bug){
-                    return !bug.isClosed;
-                }); */
+        bugTrackerApp.factory('bugOperations', function(){
+            return function(){
+                function createNew(bugName) {
+                    var newBug = {
+                        name: bugName,
+                        isClosed: false
+                    };
+                    return newBug;
+                }
+                function toggle(bug) {
+                    bug.isClosed = !bug.isClosed;
+                }
+                return { createNew: createNew, toggle: toggle };
+            }
+        });
 
-                for(var index = $scope.bugs.length-1; index >= 0; index--){
-                    if ($scope.bugs[index].isClosed)
-                        $scope.bugs.splice(index, 1);
+        bugTrackerApp.service('bugsCollection', function(bugOperations){
+            this.bugs = [];
+            var bugOperationsInstance = bugOperations();
+
+             this.addNew = function (newBugName) {
+                var newBug = bugOperationsInstance.createNew(newBugName);
+                this.bugs.push(newBug);
+            };
+
+            this.toggle = function (bug) {
+                bugOperationsInstance.toggle(bug);
+            };
+
+            this.removeClosed = function () {
+                for (var index = this.bugs.length - 1; index >= 0; index--) {
+                    if (this.bugs[index].isClosed)
+                        this.bugs.splice(index, 1);
                 }
             };
-            $scope.getClosedCount = function(){
-                return $scope.bugs.reduce(function(result, bug){
+
+            this.getClosedCount = function () {
+                return this.bugs.reduce(function (result, bug) {
                     return bug.isClosed ? ++result : result;
-                },0);
+                }, 0);
             };
+        })
+
+        bugTrackerApp.controller('bugsController', function($scope, bugsCollection){
+
+            $scope.newBugName = '';
+            $scope.bugsCollection = bugsCollection;            
         });
+
+        bugTrackerApp.controller('bugStatsController', function($scope, bugsCollection){
+            $scope.bugsCollection = bugsCollection;
+        })
     </script>
 </head>
 <body ng-app="bugTrackerApp">
+    <div class="stats" ng-controller="bugStatsController">
+        <span class="closed">{{bugsCollection.getClosedCount()}}</span>
+        <span> / </span>
+        <span>{{bugsCollection.bugs.length}}</span>
+    </div>
     <h1>Bug Tracker</h1>
     <hr>
     <section ng-controller="bugsController">
-        <div class="stats">
-            <span class="closed">{{getClosedCount()}}</span>
-            <span> / </span>
-            <span>{{bugs.length}}</span>
-        </div>
+       
         <div class="sort">
             <label for="">Order By :</label>
             <select name="" id="">
@@ -114,14 +138,14 @@
         <div class="edit">
             <label for="">Bug Name :</label>
             <input type="text" ng-model="newBugName">
-            <input type="button" value="Add New" ng-click="addNew()">
+            <input type="button" value="Add New" ng-click="bugsCollection.addNew(newBugName)">
         </div>
         <div class="list">
             <ol>
-                <li ng-repeat="bug in bugs track by $index">
+                <li ng-repeat="bug in bugsCollection.bugs track by $index">
                     <span 
                         class="bugname"
-                        ng-click="toggle(bug)"
+                        ng-click="bugsCollection.toggle(bug)"
                         ng-class="{ closed : bug.isClosed }"
                     >
                         {{bug.name}}
@@ -133,7 +157,7 @@
                     <div class="datetime">[Created At]</div>
                 </li> -->
             </ol>
-            <input type="button" value="Remove Closed" ng-click="removeClosed()">
+            <input type="button" value="Remove Closed" ng-click="bugsCollection.removeClosed()">
         </div>
     </section>
 </body>
