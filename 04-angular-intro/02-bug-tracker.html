@@ -69,6 +69,21 @@
             $scope.toggle = function(bug){
                 bug.isClosed = !bug.isClosed;
             };
+            $scope.removeClosed = function(){
+               /*  $scope.bugs = $scope.bugs.filter(function(bug){
+                    return !bug.isClosed;
+                }); */
+
+                for(var index = $scope.bugs.length-1; index >= 0; index--){
+                    if ($scope.bugs[index].isClosed)
+                        $scope.bugs.splice(index, 1);
+                }
+            };
+            $scope.getClosedCount = function(){
+                return $scope.bugs.reduce(function(result, bug){
+                    return bug.isClosed ? ++result : result;
+                },0);
+            };
         });
     </script>
 </head>
@@ -77,7 +92,7 @@
     <hr>
     <section ng-controller="bugsController">
         <div class="stats">
-            <span class="closed">1</span>
+            <span class="closed">{{getClosedCount()}}</span>
             <span> / </span>
             <span>{{bugs.length}}</span>
         </div>
@@ -118,7 +133,7 @@
                     <div class="datetime">[Created At]</div>
                 </li> -->
             </ol>
-            <input type="button" value="Remove Closed">
+            <input type="button" value="Remove Closed" ng-click="removeClosed()">
         </div>
     </section>
 </body>
