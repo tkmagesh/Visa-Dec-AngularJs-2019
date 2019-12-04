@@ -68,28 +68,15 @@
                         - key(index) => key at index
                         - length
 
-        11. Display 'createdAt' for each bug
+        (done) 11. Display 'createdAt' for each bug
         10. Persist the bug in the server
     </script>
     <script src="angular.js"></script>
     <script src="moment.js"></script>
+    <script src="utilsModule.js"></script>
+
     <script>
-        var utilsModule = angular.module('utilsModule', []);
-
-        utilsModule.value('defaultMaxLength', 30);
-
-        utilsModule.filter('trimText', function (defaultMaxLength) {
-            return function (data, maxLength) {
-                maxLength = maxLength || defaultMaxLength;
-                return data.length <= maxLength ? data : data.substr(0, maxLength) + '...';
-            };
-        });
-        utilsModule.filter('elapsed', function () {
-            return function (dateValue) {
-                return moment(dateValue).fromNow();
-            };
-        });
-        
+       
         var bugTrackerApp = angular.module('bugTrackerApp', ['utilsModule']);
 
         bugTrackerApp.factory('bugOperations', function(){
