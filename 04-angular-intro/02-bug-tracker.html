@@ -123,32 +123,53 @@
             };
         });
 
-        bugTrackerApp.service('bugsCollection', function(bugOperations, bugStorage){
-            this.bugs = bugStorage.getAll();
+        bugTrackerApp.service('bugsCollection', function(bugOperations, $http){
+            this.bugs = [];
+            var self = this;
+             $http
+                .get('http://localhost:3000/bugs')
+                .then(function (response) {
+                    self.bugs = response.data;
+                });
+
             var bugOperationsInstance = bugOperations();
 
              this.addNew = function (newBugName) {
                 var newBugData = bugOperationsInstance.createNew(newBugName);
-                var newBug = bugStorage.save(newBugData);
-                this.bugs.push(newBug);
+                $http
+                    .post('http://localhost:3000/bugs', newBugData)
+                    .then(function(response){
+                        var newBug = response.data;
+                        self.bugs.push(newBug);
+                    });
             };
 
             this.toggle = function (bug) {
                 bugOperationsInstance.toggle(bug);
-                bugStorage.save(bug);
+                 $http
+                    .put('http://localhost:3000/bugs' + '/' + bug.id, bug)
+                    .then(function (response) {
+                        var toggledBug = response.data;
+                        self.bugs = self.bugs.map(function(existingBug){
+                            return existingBug.id === toggledBug.id ? toggledBug : existingBug;
+                        });
+                    });
             };
 
             this.removeClosed = function () {
                 for (var index = this.bugs.length - 1; index >= 0; index--) {
                     if (this.bugs[index].isClosed){
-                        bugStorage.remove(this.bugs[index]);
+                         $http
+                            .delete('http://localhost:3000/bugs' + '/' + this.bugs[index].id)
                         this.bugs.splice(index, 1);
                     }
                 }
             };
         })
 
-        bugTrackerApp.controller('bugsController', function($scope, bugsCollection){
+        bugTrackerApp.controller('bugsController', function($scope, bugsCollection, $http){
+            
+           
 
             $scope.newBugName = '';
             $scope.bugsCollection = bugsCollection;            

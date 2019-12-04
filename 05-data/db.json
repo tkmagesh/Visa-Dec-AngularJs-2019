@@ -1,16 +1,13 @@
 {
   "bugs": [
     {
-      "id": 1,
-      "name": "Dates are not displayed",
-      "isClosed": false,
-      "createdAt": "2016-02-03T04:19:34.764Z"
+      "id": 3
     },
     {
-      "id": 2,
-      "name": "JSON server is very slow",
+      "id": 4,
+      "name": "Server communication failure",
       "isClosed": false,
-      "createdAt": "2016-02-02T05:04:28.176Z"
+      "createdAt": "2019-12-04T11:12:59.819Z"
     }
   ],
   "employees": [
