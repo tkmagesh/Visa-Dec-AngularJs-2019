@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Greeter</title>
+    <script src="jquery-3.4.1.js"></script>
+    <script src="angular.js"></script>
+    <script>
+    /* (function(){
+        function onBtnGreetClick(){
+            var txtUserName = document.getElementById('txtUserName'),
+                userName = txtUserName.value,
+                greetMsg = 'Hi ' + userName + ', Have a nice day!';
+            
+            var divMessage = document.getElementById('message');
+            divMessage.innerHTML = greetMsg;
+
+        }
+        function init(){
+            var btnGreet = document.getElementById('btnGreet');
+            btnGreet.addEventListener('click', onBtnGreetClick);
+        }
+        window.addEventListener('load', init);
+    })(); */
+
+    /* $(function(){
+        $('#btnGreet').click(function(){
+            var userName = $('#txtUserName').val(),
+                message = 'Hi ' + userName + ', Have a nice day';
+            $('#message').html(message);
+        });
+    }) */
+
+    var myApp = angular.module('myApp', []);
+
+    myApp.controller('greetController', function($scope){
+        $scope.userName = '';
+        $scope.greetMessage = '[Default greet message]';
+        $scope.onGreetClick = function(){
+            $scope.greetMessage = 'Hi '+ $scope.userName + ', Have a nice day!';
+        }
+    })
+    </script>
+</head>
+<body ng-app="myApp">
+    <div ng-controller="greetController">
+        <h1>Greeter</h1>
+        <hr>
+        <label for="">User Name :</label>
+        <input type="text" ng-model="userName">
+        <input type="button" value="Greet" id="btnGreet" ng-click="onGreetClick()">
+        <div id="message">{{greetMessage}}</div>
+    </div>
+</body>
+</html>
