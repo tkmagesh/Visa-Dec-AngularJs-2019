@@ -72,8 +72,25 @@
         10. Persist the bug in the server
     </script>
     <script src="angular.js"></script>
+    <script src="moment.js"></script>
     <script>
-        var bugTrackerApp = angular.module('bugTrackerApp', []);
+        var utilsModule = angular.module('utilsModule', []);
+
+        utilsModule.value('defaultMaxLength', 30);
+
+        utilsModule.filter('trimText', function (defaultMaxLength) {
+            return function (data, maxLength) {
+                maxLength = maxLength || defaultMaxLength;
+                return data.length <= maxLength ? data : data.substr(0, maxLength) + '...';
+            };
+        });
+        utilsModule.filter('elapsed', function () {
+            return function (dateValue) {
+                return moment(dateValue).fromNow();
+            };
+        });
+        
+        var bugTrackerApp = angular.module('bugTrackerApp', ['utilsModule']);
 
         bugTrackerApp.factory('bugOperations', function(){
             return function(){
@@ -154,14 +171,7 @@
             $scope.bugsCollection = bugsCollection;
         });
 
-        bugTrackerApp.value('defaultMaxLength', 30);
-
-        bugTrackerApp.filter('trimText', function(defaultMaxLength){
-            return function(data, maxLength){
-                maxLength = maxLength || defaultMaxLength;
-                return data.length <= maxLength ? data : data.substr(0,maxLength) + '...';
-            };
-        });
+       
 
         bugTrackerApp.filter('closedCount', function(){
             return function(bugs){
@@ -170,6 +180,8 @@
                 },0)
             };
         });
+
+        
 
     </script>
 </head>
@@ -205,7 +217,7 @@
             <input type="button" value="Add New" ng-click="bugsCollection.addNew(newBugName)">
         </div>
         <div class="list">
-            <input type="range" ng-model="trimTextLength" ng-init="trimTextLength=10" min="10" max="150">
+            <input type="range" ng-model="trimTextLength" ng-init="trimTextLength=30" min="30" max="150">
             <ol>
                 <li ng-repeat="bug in bugsCollection.bugs | filter:searchBug | orderBy:sortBugBy:sortBugDescending track by $index">
                     <span 
@@ -215,7 +227,7 @@
                     >
                         {{bug.name | trimText:trimTextLength}}
                     </span>
-                    <div class="datetime">[Created At]</div>
+                    <div class="datetime">{{bug.createdAt | elapsed}}</div>
                 </li>
                 <!-- <li>
                     <span class="bugname closed">[This is bug - 2]</span>
